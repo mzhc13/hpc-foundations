@@ -240,6 +240,14 @@ html,body{background:var(--bg)!important;margin:0!important}
 .multiple-select-feedback{list-style:none;padding:0;margin:15px 0 0}
 .multiple-select-feedback li{padding:5px;margin-bottom:6px;border-radius:6px;color:#fff}
 .feedback-correct{background:#eaf6ea;color:#fff!important}.feedback-incorrect{background:#fcecec;color:#fff!important}
+
+.mobile-notice{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:20000;padding:20px}
+.mobile-notice[hidden]{display:none}
+.mobile-notice-box{background:#6c2a68;color:#fff;border:3px solid #fff;border-radius:22px;padding:26px 24px;max-width:420px;text-align:center}
+.mobile-notice-box h2{margin:0 0 10px;font-size:24px;color:#fff}
+.mobile-notice-box p{margin:0 0 18px;font-size:16px;line-height:1.5;color:#fff}
+.mobile-notice-box button{background:#fff;color:#042f39;border:0;border-radius:22px;padding:10px 22px;font-size:16px;font-weight:700;cursor:pointer}
+.mobile-notice-box button:hover,.mobile-notice-box button:focus-visible{background:#ffe66d;outline:3px solid #ffe66d;outline-offset:3px}
 </style>
 
 <main id="main-content" class="wrap">
@@ -335,6 +343,15 @@ html,body{background:var(--bg)!important;margin:0!important}
 <button class="vclose" aria-label="Close video" onclick="closeVideo()">×</button>
 </div>
 </div>
+
+<div id="mobile-notice" class="mobile-notice" role="dialog" aria-modal="true" aria-labelledby="mobile-notice-title" hidden>
+  <div class="mobile-notice-box">
+    <h2 id="mobile-notice-title">Better on a laptop</h2>
+    <p>This interactive map works best on a laptop or desktop screen. For the best experience, open this page on a larger device.</p>
+    <button type="button" id="mobile-notice-btn">Continue anyway</button>
+  </div>
+</div>
+
 {% include activity-modal.html %}
 </main>
 
@@ -521,5 +538,32 @@ window.activitiesData = {};
   } catch (e) {
     /* If anything fails, the card stays hidden and the rest of the page is unaffected. */
   }
+})();
+</script>
+
+<script>
+(function () {
+  var box = document.getElementById("mobile-notice");
+  var btn = document.getElementById("mobile-notice-btn");
+  if (!box || !btn) return;
+
+  // Phone detection: phone user agent, or a small physical screen (works in portrait and landscape)
+  var isPhone =
+    /Android.+Mobile|iPhone|iPod|Windows Phone/i.test(navigator.userAgent) ||
+    Math.min(screen.width, screen.height) <= 600;
+  if (!isPhone) return;
+
+  // Show once per browser session, so it does not reappear on every reload
+  try { if (sessionStorage.getItem("mobileNoticeSeen")) return; } catch (e) {}
+
+  box.hidden = false;
+  btn.focus();
+
+  function close() {
+    box.hidden = true;
+    try { sessionStorage.setItem("mobileNoticeSeen", "1"); } catch (e) {}
+  }
+  btn.addEventListener("click", close);
+  box.addEventListener("click", function (e) { if (e.target === box) close(); });
 })();
 </script>
